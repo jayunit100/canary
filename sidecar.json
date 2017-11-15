@@ -1,0 +1,11 @@
+{
+	  "services":{
+			"zookeeper":2181,
+		  "cfssl":0,
+		  "postgres":0,
+		  "webapp":0,
+		  "solr":0,
+		  "documentation": 0
+		},
+		"svcTimeout":10
+	}
