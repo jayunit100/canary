@@ -1,0 +1,75 @@
+# Building
+
+Run the dockerfile, it will build the binary for you:
+
+docker build -t jayunit100/hub-sidecar:1.0 .
+
+the build.sh is just a hacky convenience script for local development, use at your own risk.
+
+# Running
+
+Run the replication controller :)
+
+```
+kubectl create -f ./sidecar-rc.json
+```
+
+# Using
+
+Go into your pod that is running, called hub-sidecar-*, and run something like this:
+
+```
+kubectl exec -t -i <name of the pod> curl localhost:3000/status
+```
+
+This brings up a metrics endpoint, where you can clearly see the IP addresses resolved, and more interestingly,
+
+how long nslookup takes.
+
+You can see in a healthy kube cluster, that 3 ms or less nslookup returns.
+
+But for services that dont exist (made up ones 'nginx' and 'jobrunner' which we dont directly have services for here...), 
+
+that nslookuptime is > 10 ms.
+
+This can be used to debug customer installations - i.e. if nslookup is routinely taking 10ms or so for well defined services --- something is probably messed up.
+
+In an unhealthy cluster, like one where DNS completely broke... you'll see something like this.
+Obviously thisis an extreme example, but seeing varying numbers in the error_total fields is a hint things
+are unstable..
+```
+	nslookup_tries 8 
+
+	# warning! if non-zero, there was a low level failure in NS lookup !
+	panics 0 
+
+	# services_detail_documentation = [] (ip lookup documentation: no such host) 
+
+	# services_detail_zookeeper = [] (ip lookup zookeeper: no such host) 
+
+	# services_summary = No cfg.Services are resolving... Your cluster networking is possibly failing. 
+
+	# services_detail_cfssl = [] (ip lookup cfssl: no such host) 
+
+	# services_detail_postgres = [] (ip lookup postgres: no such host) 
+
+	# services_detail_webapp = [] (ip lookup webapp: no such host) 
+
+	# services_detail_solr = [] (ip lookup solr: no such host) 
+
+	# service metrics: total lookups
+	postgres_curl_error_total  8 
+	webapp_curl_error_total  8 
+	solr_curl_error_total  8 
+	documentation_curl_error_total  8 
+	zookeeper_curl_error_total  8 
+	cfssl_curl_error_total  8 
+
+	# service lookup millisecond timings (-1 == failed ) 
+	postgres_time -1 
+	webapp_time -1 
+	solr_time -1 
+	documentation_time -1 
+	zookeeper_time -1 
+	cfssl_time -1 
+```
