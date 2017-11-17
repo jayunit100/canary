@@ -5,7 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/negroni"
 
-	"bitbucket.org/bdsengineering/hub-sidecar/cmd/sidecar"
+	"github.com/blackducksoftware/canary"
 )
 
 var Version = "<None: Please build w/ 'go build ldflags -X sidecar.buildstamp `date` -X sidecar.gitinfo `git status`'>"

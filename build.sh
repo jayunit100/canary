@@ -1,23 +1,17 @@
 #!/usr/bin/env bash
 # TODO We can deploy this from a dockerfile, as a binary, once we have everything we want in it.
 
-export GOPATH=/Users/`whoami`/go
+export CANARY=$GOPATH/src/github.com/blackducksoftware/canary/
 
-echo "assuming that you've cloned this to $GOPATH/src/bitbucket.org/bdsengineering/hub-sidecar"
-
-if [ ! -f $GOPATH ]; then
-	GOPATH=/Users/`whoami`/work/go
-	echo "tried a different path : $GOPATH"
-fi
-if [ ! -d $GOPATH/src/bitbucket.org/bdsengineering/hub-sidecar/ ]; then
-	echo "Exiting the build.  Looks like your gopath isnt set up!"
+if [ ! -d $CANARY ]; then
+	echo "Exiting the build.  Looks like your gopath isnt set up to have $CANARY !"
 	exit 1
 fi 	
 
 set -x
-rm main 
 
-go build cmd/main.go && ./main
+rm main
 
-
-#go build ./src/github.com/jayunit100/hub-sidecar/main/main.go
+# This will put the 'sidecar' binary into your GOPATH.
+go build ./cmd/sidecar/service_scanner.go
+$GOPATH/bin/sidecar
