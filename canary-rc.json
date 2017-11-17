@@ -20,7 +20,7 @@
             "containers": [
                {
                   "name": "hub-sidecar",
-                  "image": "jayunit100/hub-sidecar:0.1",
+                  "image": "jayunit100/canary:1.0",
                   "ports": [
                      {
                         "containerPort": 3000

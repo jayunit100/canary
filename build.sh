@@ -13,5 +13,8 @@ set -x
 rm main
 
 # This will put the 'sidecar' binary into your GOPATH.
-go build ./cmd/sidecar/service_scanner.go
-$GOPATH/bin/sidecar
+rm $GOPATH/bin/service_scanner
+export GOBIN=$GOPATH/bin
+go install ./cmd/sidecar/service_scanner.go
+
+$GOPATH/bin/service_scanner

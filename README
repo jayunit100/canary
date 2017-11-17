@@ -1,6 +1,6 @@
 # Building
 
-Run the dockerfile :)
+Run the dockerfile, it will build the binary for you:
 
 docker build -t jayunit100/hub-sidecar:1.0 .
 
