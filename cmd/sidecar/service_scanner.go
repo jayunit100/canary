@@ -14,8 +14,6 @@ import (
 	"github.com/spf13/viper"
 )
 
-var registered = false
-
 // Initialize the metric to 0, since at start, we have successfully seen each service 0 times.
 func init() {
 	prometheus.Unregister(prometheus.NewProcessCollector(os.Getpid(), ""))
@@ -39,6 +37,8 @@ func init() {
 
 	prometheus.MustRegister(serviceCheck)
 
+	// This allows someone to go into the container and change the curl endpoints.
+	// for like realtime debugging.
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		fmt.Println("Config file changed:", e.Name)
 		cfg = ViperLoad()
@@ -77,6 +77,8 @@ func main() {
 		os.Exit(0)
 	})
 	log.Info("Serving")
+
+	// TODO make this configurable - maybe even viperize it.
 	http.ListenAndServe(":3000", nil)
 	log.Info("Server started !")
 
@@ -100,8 +102,6 @@ func (c *Config) url(s string) string {
 		[]string{s, string(c.Services[s])},
 		":")
 }
-
-var hasRun bool
 
 func ViperLoad() *Config {
 	// Default config: The blackducksoftware:hub services.  export ENV_CONFIG_JSON to override this.
@@ -128,6 +128,9 @@ func ViperLoad() *Config {
       `)
 	}
 	d1 := []byte(sidecarTargets)
+
+	// Default config is written here.  We use file as a default config because it provides an
+	// embedded self tests - users will probably always config by injecting env vars that get written to this file.
 	err := ioutil.WriteFile("../../sidecar.json", d1, 0777)
 	if err != nil {
 		panic(fmt.Sprintf("Error writing default config file !", err))
@@ -141,6 +144,8 @@ func ViperLoad() *Config {
 	}
 
 	var cfg *Config
+
+	// Read the viperized file input into the config struct.
 	err = viper.Unmarshal(&cfg)
 
 	return cfg
