@@ -1,8 +1,11 @@
 package: .
 import:
-- package: github.com/gorilla/mux
-  version: ~1.5.0
-- package: github.com/sirupsen/logrus
-  version: ~1.0.3
-- package: github.com/urfave/negroni
-  version: ~0.2.0
+- package: k8s.io/apimachinery
+  subpackages:
+  - pkg/api/errors
+  - pkg/apis/meta/v1
+- package: k8s.io/client-go
+  version: ^5.0.1
+  subpackages:
+  - kubernetes
+  - tools/clientcmd
