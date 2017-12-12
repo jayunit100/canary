@@ -17,4 +17,5 @@ rm $GOPATH/bin/service_scanner
 export GOBIN=$GOPATH/bin
 go install ./cmd/sidecar/worker.go
 
-$GOPATH/bin/worker --kubeconfig=/Users/jayunit100/.kube/config --master=https://34.227.56.110.xip.io:8443
+KUBE_CONFIG=~/.kube/config
+$GOPATH/bin/worker --kubeconfig=$KUBE_CONFIG --master=https://34.227.56.110.xip.io:8443
