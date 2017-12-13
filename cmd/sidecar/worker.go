@@ -22,7 +22,6 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-
 	"k8s.io/api/core/v1"
 	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
@@ -38,6 +37,17 @@ type Controller struct {
 	indexer  cache.Indexer
 	queue    workqueue.RateLimitingInterface
 	informer cache.Controller
+}
+
+// Example of how to update a pod
+func PodEdit(obj2 interface{}, clientset *kubernetes.Clientset) {
+	pod := obj2.(*v1.Pod)
+	p, err := clientset.CoreV1().Pods(pod.GetNamespace()).Get(pod.Name, meta_v1.GetOptions{})
+	if err != nil {
+		panic(err)
+	}
+	p.SetAnnotations(map[string]string{"hola": "senor"})
+	clientset.CoreV1().Pods(pod.GetNamespace()).Update(p)
 }
 
 func NewController(queue workqueue.RateLimitingInterface, indexer cache.Indexer, informer cache.Controller) *Controller {
@@ -172,17 +182,21 @@ func main() {
 	// Note that when we finally process the item from the workqueue, we might see a newer version
 	// of the Pod than the version which was responsible for triggering the update.
 	indexer, informer := cache.NewIndexerInformer(podListWatcher, &v1.Pod{}, 0, cache.ResourceEventHandlerFuncs{
-		AddFunc: func(obj interface{}) {
-			key, err := cache.MetaNamespaceKeyFunc(obj)
+		AddFunc: func(obj2 interface{}) {
+			key, err := cache.MetaNamespaceKeyFunc(obj2)
 			if err == nil {
 				queue.Add(key)
 			}
+			fmt.Println("ADD")
+			PodEdit(obj2, clientset)
 		},
 		UpdateFunc: func(old interface{}, new interface{}) {
 			key, err := cache.MetaNamespaceKeyFunc(new)
 			if err == nil {
 				queue.Add(key)
 			}
+			fmt.Println("UPDATE")
+
 		},
 		DeleteFunc: func(obj interface{}) {
 			// IndexerInformer uses a delta queue, therefore for deletes we have to use this
@@ -191,9 +205,12 @@ func main() {
 			if err == nil {
 				queue.Add(key)
 			}
+			fmt.Println("DEL")
+
 		},
 	}, cache.Indexers{})
 
+	// Example of how to update a pod
 	controller := NewController(queue, indexer, informer)
 
 	// We can now warm up the cache for initial synchronization.
